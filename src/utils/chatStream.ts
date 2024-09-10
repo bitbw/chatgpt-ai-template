@@ -4,6 +4,11 @@ import {
   ParsedEvent,
   ReconnectInterval,
 } from 'eventsource-parser';
+import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+
+const proxy = 'http://127.0.0.1:7890';
+const httpsProxyAgent = new HttpsProxyAgent(proxy);
 
 const createPrompt = (inputCode: string) => {
   const data = (inputCode: string) => {
@@ -24,7 +29,7 @@ export const OpenAIStream = async (
 
   const system = { role: 'system', content: prompt };
 
-  const res = await fetch(`https://api.openai.com/v1/chat/completions`, {
+  const options = {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${key || process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
@@ -36,7 +41,15 @@ export const OpenAIStream = async (
       temperature: 0,
       stream: true,
     }),
-  });
+  } as any;
+  
+  if (process.env.NODE_ENV === 'development') {
+    options.agent = httpsProxyAgent;
+  }
+  const res = await fetch(
+    `https://api.openai.com/v1/chat/completions`,
+    options,
+  );
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();

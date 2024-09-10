@@ -1,7 +1,7 @@
 import { ChatBody } from '@/types/types';
 import { OpenAIStream } from '@/utils/chatStream';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 export async function GET(req: Request): Promise<Response> {
   try {
